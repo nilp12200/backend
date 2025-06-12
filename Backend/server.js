@@ -1317,10 +1317,6 @@
 
 
 
-// Descript
-
-
-
 
 // Description: This is the backend server for the Truck Tracking application.
 const express = require("express");
@@ -1331,20 +1327,8 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-// ✅ CORS setup: allow frontend on Render + local dev
-const allowedOrigins = [
-  'https://frontend-oowu.onrender.com',
-  'http://localhost:5173'
-];
 
-app.use(cors({
-  origin: allowedOrigins,
-  methods: ['GET', 'POST'],
-  credentials: true
-}));
-
-// app.use(bodyParser.json());
-// app.use(cors());
+app.use(cors());
 app.use(bodyParser.json());
 
 // SQL Server configuration

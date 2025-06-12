@@ -2057,3 +2057,4 @@ app.get('/api/fetch-qty', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server is running at http://localhost:${PORT}`);
 });
+app.use(cors()); // temporarily allow all origins

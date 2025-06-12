@@ -1310,7 +1310,12 @@
 
 
 
-
+import cors from 'cors';
+app.use(cors({
+  origin: 'https://frontend-oowu.onrender.com/', // ✅ use frontend URL or '*'
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
 
 
 

@@ -1353,9 +1353,37 @@ async function getPool() {
 }
 
 // 🔐 Login API
+// app.post("/api/login", async (req, res) => {
+//   const { username, password } = req.body;
+//   console.log("Login attempt:", username, password);
+
+//   try {
+//     const pool = await getPool();
+//     const result = await pool
+//       .request()
+//       .input("username", sql.NVarChar, username)
+//       .input("password", sql.NVarChar, password)
+//       .query(
+//         "SELECT * FROM Users WHERE Username = @username AND Password = @password"
+//       );
+
+//     if (result.recordset.length > 0) {
+//       res.json({ success: true, message: "Login successful" });
+//     } else {
+//       res.status(401).json({ success: false, message: "Invalid credentials" });
+//     }
+//   } catch (err) {
+//     console.error("SQL error:", err);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
 app.post("/api/login", async (req, res) => {
   const { username, password } = req.body;
   console.log("Login attempt:", username, password);
+
+  if (!username || !password) {
+    return res.status(400).json({ success: false, message: "Username and password required" });
+  }
 
   try {
     const pool = await getPool();

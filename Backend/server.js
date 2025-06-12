@@ -1310,15 +1310,14 @@
 
 
 
-import cors from 'cors';
-app.use(cors({
-  origin: 'https://frontend-oowu.onrender.com/', // ✅ use frontend URL or '*'
-  methods: ['GET', 'POST'],
-  credentials: true
-}));
 
 
 
+
+
+
+
+// Descript
 
 
 
@@ -1332,8 +1331,20 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+// ✅ CORS setup: allow frontend on Render + local dev
+const allowedOrigins = [
+  'https://frontend-oowu.onrender.com',
+  'http://localhost:5173'
+];
 
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
+
+// app.use(bodyParser.json());
+// app.use(cors());
 app.use(bodyParser.json());
 
 // SQL Server configuration
@@ -1358,37 +1369,9 @@ async function getPool() {
 }
 
 // 🔐 Login API
-// app.post("/api/login", async (req, res) => {
-//   const { username, password } = req.body;
-//   console.log("Login attempt:", username, password);
-
-//   try {
-//     const pool = await getPool();
-//     const result = await pool
-//       .request()
-//       .input("username", sql.NVarChar, username)
-//       .input("password", sql.NVarChar, password)
-//       .query(
-//         "SELECT * FROM Users WHERE Username = @username AND Password = @password"
-//       );
-
-//     if (result.recordset.length > 0) {
-//       res.json({ success: true, message: "Login successful" });
-//     } else {
-//       res.status(401).json({ success: false, message: "Invalid credentials" });
-//     }
-//   } catch (err) {
-//     console.error("SQL error:", err);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// });
 app.post("/api/login", async (req, res) => {
   const { username, password } = req.body;
   console.log("Login attempt:", username, password);
-
-  if (!username || !password) {
-    return res.status(400).json({ success: false, message: "Username and password required" });
-  }
 
   try {
     const pool = await getPool();
@@ -1555,35 +1538,48 @@ app.put('/api/plantmaster/update/:id', async (req, res) => {
 });
 
 
-// 🌱 Plant Master API
-app.post("/api/plantmaster", async (req, res) => {
-  const { plantName, plantAddress, contactPerson, mobileNo, remarks } =
-    req.body;
+// // 🌱 Plant Master API
+// app.post("/api/plantmaster", async (req, res) => {
+//   const { plantName, plantAddress, contactPerson, mobileNo, remarks } =
+//     req.body;
 
-  if (!plantName) {
-    return res.status(400).json({ message: "PlantName is required" });
-  }
+//   if (!plantName) {
+//     return res.status(400).json({ message: "PlantName is required" });
+//   }
 
+//   try {
+//     const pool = await sql.connect(dbConfig);
+//     await pool
+//       .request()
+//       .input("PlantName", sql.VarChar(200), plantName)
+//       .input("PlantAddress", sql.VarChar(sql.MAX), plantAddress || "")
+//       .input("ContactPerson", sql.VarChar(200), contactPerson || "")
+//       .input("MobileNo", sql.VarChar(50), mobileNo || "")
+//       .input("Remarks", sql.VarChar(sql.MAX), remarks || "").query(`
+//         INSERT INTO PlantMaster (PlantName, PlantAddress, ContactPerson, MobileNo, Remarks)
+//         VALUES (@PlantName, @PlantAddress, @ContactPerson, @MobileNo, @Remarks)
+//       `);
+
+//     res.status(200).json({ message: "Plant details submitted successfully." });
+//   } catch (error) {
+//     console.error("Insert error:", error);
+//     res.status(500).json({ message: "Error inserting plant details" });
+//   }
+// });
+
+app.get("/api/plants", async (req, res) => {
   try {
-    const pool = await sql.connect(dbConfig);
-    await pool
+    const pool = await getPool();
+    const result = await pool
       .request()
-      .input("PlantName", sql.VarChar(200), plantName)
-      .input("PlantAddress", sql.VarChar(sql.MAX), plantAddress || "")
-      .input("ContactPerson", sql.VarChar(200), contactPerson || "")
-      .input("MobileNo", sql.VarChar(50), mobileNo || "")
-      .input("Remarks", sql.VarChar(sql.MAX), remarks || "").query(`
-        INSERT INTO PlantMaster (PlantName, PlantAddress, ContactPerson, MobileNo, Remarks)
-        VALUES (@PlantName, @PlantAddress, @ContactPerson, @MobileNo, @Remarks)
-      `);
-
-    res.status(200).json({ message: "Plant details submitted successfully." });
+      .query("SELECT PlantName FROM PlantMaster");
+    const plantNames = result.recordset.map((row) => row.PlantName);
+    res.json(plantNames);
   } catch (error) {
-    console.error("Insert error:", error);
-    res.status(500).json({ message: "Error inserting plant details" });
+    console.error("Error fetching plants:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
-
 
 // 🚚 Truck Transaction API
 app.post("/api/truck-transaction", async (req, res) => {
@@ -2057,4 +2053,3 @@ app.get('/api/fetch-qty', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server is running at http://localhost:${PORT}`);
 });
-app.use(cors()); // temporarily allow all origins

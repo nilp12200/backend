@@ -1550,48 +1550,35 @@ app.put('/api/plantmaster/update/:id', async (req, res) => {
 });
 
 
-// // 🌱 Plant Master API
-// app.post("/api/plantmaster", async (req, res) => {
-//   const { plantName, plantAddress, contactPerson, mobileNo, remarks } =
-//     req.body;
+// 🌱 Plant Master API
+app.post("/api/plantmaster", async (req, res) => {
+  const { plantName, plantAddress, contactPerson, mobileNo, remarks } =
+    req.body;
 
-//   if (!plantName) {
-//     return res.status(400).json({ message: "PlantName is required" });
-//   }
+  if (!plantName) {
+    return res.status(400).json({ message: "PlantName is required" });
+  }
 
-//   try {
-//     const pool = await sql.connect(dbConfig);
-//     await pool
-//       .request()
-//       .input("PlantName", sql.VarChar(200), plantName)
-//       .input("PlantAddress", sql.VarChar(sql.MAX), plantAddress || "")
-//       .input("ContactPerson", sql.VarChar(200), contactPerson || "")
-//       .input("MobileNo", sql.VarChar(50), mobileNo || "")
-//       .input("Remarks", sql.VarChar(sql.MAX), remarks || "").query(`
-//         INSERT INTO PlantMaster (PlantName, PlantAddress, ContactPerson, MobileNo, Remarks)
-//         VALUES (@PlantName, @PlantAddress, @ContactPerson, @MobileNo, @Remarks)
-//       `);
-
-//     res.status(200).json({ message: "Plant details submitted successfully." });
-//   } catch (error) {
-//     console.error("Insert error:", error);
-//     res.status(500).json({ message: "Error inserting plant details" });
-//   }
-// });
-
-app.get("/api/plants", async (req, res) => {
   try {
-    const pool = await getPool();
-    const result = await pool
+    const pool = await sql.connect(dbConfig);
+    await pool
       .request()
-      .query("SELECT PlantName FROM PlantMaster");
-    const plantNames = result.recordset.map((row) => row.PlantName);
-    res.json(plantNames);
+      .input("PlantName", sql.VarChar(200), plantName)
+      .input("PlantAddress", sql.VarChar(sql.MAX), plantAddress || "")
+      .input("ContactPerson", sql.VarChar(200), contactPerson || "")
+      .input("MobileNo", sql.VarChar(50), mobileNo || "")
+      .input("Remarks", sql.VarChar(sql.MAX), remarks || "").query(`
+        INSERT INTO PlantMaster (PlantName, PlantAddress, ContactPerson, MobileNo, Remarks)
+        VALUES (@PlantName, @PlantAddress, @ContactPerson, @MobileNo, @Remarks)
+      `);
+
+    res.status(200).json({ message: "Plant details submitted successfully." });
   } catch (error) {
-    console.error("Error fetching plants:", error);
-    res.status(500).json({ error: "Server error" });
+    console.error("Insert error:", error);
+    res.status(500).json({ message: "Error inserting plant details" });
   }
 });
+
 
 // 🚚 Truck Transaction API
 app.post("/api/truck-transaction", async (req, res) => {
